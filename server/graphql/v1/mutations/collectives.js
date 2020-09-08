@@ -1,7 +1,7 @@
 import { map } from 'bluebird';
 import config from 'config';
 import slugify from 'limax';
-import { get, omit, truncate } from 'lodash';
+import { get, omit, pick, truncate } from 'lodash';
 import sanitize from 'sanitize-html';
 import sequelize from 'sequelize';
 import { v4 as uuid } from 'uuid';
@@ -35,7 +35,30 @@ export async function createCollective(_, args, req) {
   let hostCollective, parentCollective, collective;
 
   const collectiveData = {
-    ...args.collective,
+    ...pick(args.collective, [
+      'slug',
+      'type',
+      'name',
+      'company',
+      'website',
+      'twitterHandle',
+      'githubHandle',
+      'description',
+      'longDescription',
+      'expensePolicy',
+      'startsAt',
+      'endsAt',
+      'timezone',
+      'currency',
+      'image',
+      'backgroundImage',
+      'tags',
+      'settings',
+      'HostCollectiveId',
+      'ParentCollectiveId',
+      'isIncognito',
+      'data.eventInfo.privateInstructions',
+    ]),
     CreatedByUserId: req.remoteUser.id,
     settings: { ...DEFAULT_COLLECTIVE_SETTINGS, ...args.collective.settings },
   };
