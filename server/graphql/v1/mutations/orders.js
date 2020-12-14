@@ -25,7 +25,6 @@ import { getChargeRetryCount, getNextChargeAndPeriodStartDates } from '../../../
 import { canUseFeature } from '../../../lib/user-permissions';
 import { capitalize, formatCurrency, md5, parseToBoolean } from '../../../lib/utils';
 import models from '../../../models';
-import { setupCreditCard } from '../../../paymentProviders/stripe/creditcard';
 import { FeatureNotAllowedForUser, Forbidden, NotFound, Unauthorized, ValidationFailed } from '../../errors';
 
 const oneHourInSeconds = 60 * 60;
@@ -107,9 +106,7 @@ const checkGuestContribution = async (order, loaders) => {
     throw new Error('Guest contributions need to be made to an existing collective');
   }
 
-  if (!parseToBoolean(config.guestContributions.enable) && !get(collective.settings, 'features.GUEST_CONTRIBUTIONS')) {
-    throw new Error('Guest contributions are not enabled yet');
-  } else if (interval) {
+  if (interval) {
     throw new Error('You need to sign up to create a recurring contribution');
   } else if (!guestInfo) {
     throw new Error('You need to provide a guest profile with an email for logged out contributions');
@@ -613,12 +610,7 @@ export async function confirmOrder(order, remoteUser, guestToken) {
   });
 
   if (!remoteUser) {
-    if (
-      !parseToBoolean(config.guestContributions.enable) &&
-      !get(order.collective, 'settings.features.GUEST_CONTRIBUTIONS')
-    ) {
-      throw new Unauthorized('You need to be logged in to confirm an order');
-    } else if (!guestToken) {
+    if (!guestToken) {
       throw new Error('We could not authenticate your request');
     } else {
       const result = await loadGuestToken(guestToken);
