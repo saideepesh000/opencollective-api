@@ -1,4 +1,5 @@
-import { GraphQLBoolean, GraphQLFloat, GraphQLNonNull, GraphQLString } from 'graphql';
+import cryptoRandomString from 'crypto-random-string';
+import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 import GraphQLJSON from 'graphql-type-json';
 import { cloneDeep, set } from 'lodash';
 
@@ -14,6 +15,21 @@ import { Account } from '../interface/Account';
 import { Host } from '../object/Host';
 import { Individual } from '../object/Individual';
 import AccountSettingsKey from '../scalar/AccountSettingsKey';
+
+const AccountWithRecoveryCodes = new GraphQLObjectType({
+  name: 'AccountWithRecoveryCodes',
+  fields: {
+    account: {
+      type: new GraphQLNonNull(Account),
+      description: '',
+    },
+    recoveryCodes: {
+      type: new GraphQLList(GraphQLString),
+      description:
+        '',
+    },
+  },
+});
 
 const accountMutations = {
   editAccountSetting: {
@@ -111,7 +127,7 @@ const accountMutations = {
     },
   },
   addTwoFactorAuthTokenToIndividual: {
-    type: new GraphQLNonNull(Individual),
+    type: new GraphQLNonNull(AccountWithRecoveryCodes),
     description: 'Add 2FA to the Account if it does not have it',
     args: {
       account: {
@@ -157,9 +173,15 @@ const accountMutations = {
 
       const encryptedText = crypto.encrypt(args.token);
 
-      await user.update({ twoFactorAuthToken: encryptedText });
+      /** Generate recovery codes, hash and store them in the table, and return them to the user to write down */
+      const recoveryCodesArray = Array.from({length: 6}, () => cryptoRandomString({length: 16, type: 'distinguishable'}));
+      const hashedRecoveryCodesArray = recoveryCodesArray.map((code) => {
+        return crypto.hash(code);
+      })
 
-      return account;
+      await user.update({ twoFactorAuthToken: encryptedText, twoFactorAuthRecoveryCodes: hashedRecoveryCodesArray });
+
+      return { account: account, recoveryCodes: recoveryCodesArray };
     },
   },
   removeTwoFactorAuthTokenFromIndividual: {
@@ -202,7 +224,7 @@ const accountMutations = {
         throw new Unauthorized('Two-factor authentication code failed. Please try again');
       }
 
-      await user.update({ twoFactorAuthToken: null });
+      await user.update({ twoFactorAuthToken: null, recoveryCodes: null });
 
       return account;
     },
