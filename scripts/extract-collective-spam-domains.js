@@ -18,7 +18,7 @@ async function run() {
     where: {
       approvedAt: { [Op.is]: null },
       longDescription: { [Op.not]: null },
-      createdAt: { [Op.gt]: '2020-07-21' },
+      createdAt: { [Op.gt]: '2020-06-21' },
     },
     order: [['createdAt', 'DESC']],
     paranoid: false,
@@ -49,9 +49,9 @@ async function run() {
   const entries = Object.entries(domains);
   entries.sort(compareEntries);
 
-  const topDomains = entries.slice(0, 120).map(el => el[0]);
+  const topDomains = entries.slice(0, 130).map(el => el[0]);
 
-  console.log('Updated SPAMMERS_DOMAINS', JSON.stringify(union(SPAMMERS_DOMAINS, topDomains).sort(), null, 2));
+  console.log('Updated SPAMMERS_DOMAINS = ', JSON.stringify(union(SPAMMERS_DOMAINS, topDomains).sort(), null, 2));
 
   await sequelize.close();
 }
