@@ -473,65 +473,6 @@ const mutations = {
       return addFundsToCollective(args.order, req.remoteUser);
     },
   },
-  createUpdate: {
-    type: UpdateType,
-    deprecationReason: 'This endpoint has been moved to GQLV2',
-    args: {
-      update: {
-        type: new GraphQLNonNull(UpdateInputType),
-      },
-    },
-    resolve(_, args, req) {
-      return updateMutations.createUpdate(_, args, req);
-    },
-  },
-  editUpdate: {
-    type: UpdateType,
-    args: {
-      update: {
-        type: new GraphQLNonNull(UpdateAttributesInputType),
-      },
-    },
-    resolve(_, args, req) {
-      return updateMutations.editUpdate(_, args, req);
-    },
-  },
-  publishUpdate: {
-    type: UpdateType,
-    args: {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-      },
-      notificationAudience: {
-        type: new GraphQLNonNull(UpdateAudienceTypeEnum),
-      },
-    },
-    resolve(_, args, req) {
-      return updateMutations.publishUpdate(_, args, req);
-    },
-  },
-  unpublishUpdate: {
-    type: UpdateType,
-    args: {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-      },
-    },
-    resolve(_, args, req) {
-      return updateMutations.unpublishUpdate(_, args, req);
-    },
-  },
-  deleteUpdate: {
-    type: UpdateType,
-    args: {
-      id: {
-        type: new GraphQLNonNull(GraphQLInt),
-      },
-    },
-    resolve(_, args, req) {
-      return updateMutations.deleteUpdate(_, args, req);
-    },
-  },
   createComment: {
     type: CommentType,
     args: {
