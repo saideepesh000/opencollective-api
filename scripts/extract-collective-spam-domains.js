@@ -28,7 +28,7 @@ async function run() {
     if (collective.data?.isBanned !== true && collective.data?.seo !== true) {
       continue;
     }
-    console.log(collective.slug, collective.createdAt);
+    // console.log(collective.slug, collective.createdAt);
 
     const content = `${collective.slug} ${collective.name} ${collective.description} ${collective.longDescription} ${collective.website}`;
     const urls = getUrls(content);

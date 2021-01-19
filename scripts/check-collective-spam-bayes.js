@@ -61,6 +61,13 @@ async function run() {
       const transactions = await collective.getTransactions({});
       if (transactions.length === 0) {
         console.log('NEW', collective.slug, `https://opencollective.com/${collective.slug}`);
+        const admins = await collective.getAdmins();
+        for (const admin of admins) {
+          const adminTransactions = await admin.getTransactions({});
+          if (adminTransactions.length === 0) {
+            console.log('ADM', admin.slug, `https://opencollective.com/${admin.slug}`);
+          }
+        }
       } else {
         // console.log('HAS_TRANSACTIONS', `https://opencollective.com/${collective.slug}`);
       }
