@@ -2,7 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 import bayes from 'bayes';
+import getUrls from 'get-urls';
 import { clamp } from 'lodash';
+import sanitizeHtml from 'sanitize-html';
 
 import slackLib, { OPEN_COLLECTIVE_SLACK_CHANNEL } from '../lib/slack';
 
@@ -426,10 +428,39 @@ const getBayesClassifier = async (): Promise<BayesClassifier> => {
   return bayesClassifier;
 };
 
-export const collectiveBayesCheck = async (collective: any, extraString: string): Promise<string> => {
-  const content = `${collective.slug.split('-').join(' ')} ${collective.name} ${collective.description} ${
-    collective.longDescription
-  } ${collective.website} ${extraString}`;
+const stringifyUrl = url => {
+  return url
+    .replace('http://', '')
+    .replace('https://', '')
+    .split('/')
+    .join(' ')
+    .split('-')
+    .join(' ')
+    .split('.')
+    .join(' ')
+    .split('?')
+    .join(' ')
+    .split('=')
+    .join(' ')
+    .split('&')
+    .join(' ')
+    .split('#')
+    .join(' ');
+};
+
+export const collectiveBayesCheck = async (collective: any, extraString = ''): Promise<string> => {
+  const slugString = (collective.slug || '').split('-').join(' ');
+  const websiteString = stringifyUrl(collective.website || '');
+
+  const urls = getUrls(collective.longDescription || '');
+  const urlsString = [...urls].map(stringifyUrl).join(' ');
+
+  const longDescriptionString = sanitizeHtml(collective.longDescription || '', {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  const content = `${slugString} ${collective.name} ${collective.description} ${longDescriptionString} ${urlsString} ${websiteString} ${extraString}`;
 
   const classifier = await getBayesClassifier();
 

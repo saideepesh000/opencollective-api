@@ -1155,6 +1155,16 @@ export default function (Sequelize, DataTypes) {
     }).map(member => member.memberCollective);
   };
 
+  Collective.prototype.getMemberships = function ({ role } = {}) {
+    return models.Member.findAll({
+      where: {
+        MemberCollectiveId: this.id,
+        role: role,
+      },
+      include: [{ model: models.Collective, as: 'collective' }],
+    }).map(member => member.collective);
+  };
+
   /**
    * Get the admin users { id, email } of this collective
    */
